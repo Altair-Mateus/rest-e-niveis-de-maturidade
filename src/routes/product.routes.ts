@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { createProductService } from "../services/product.service";
+import { Resource, ResourceCollection } from "../http/resource";
 
 const router = Router();
 
@@ -8,10 +9,12 @@ router.get("/:productSlug", async (req, res) => {
   const product = await productService.getProductBySlug(
     req.params.productSlug as string
   );
-  res.json(product);
+
+  const resource = new Resource(product);
+  res.json(resource);
 });
 
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
   const productService = await createProductService();
   const {
     page = 1,
@@ -30,7 +33,15 @@ router.get("/", async (req, res) => {
       categories_slug,
     },
   });
-  res.json({ products, total });
+
+  const collection = new ResourceCollection(products, {
+    paginationData: {
+      total,
+      page: parseInt(page as string),
+      limit: parseInt(limit as string)
+    }
+  });
+  next(collection)
 });
 
 export default router;

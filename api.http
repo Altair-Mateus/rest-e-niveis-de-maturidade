@@ -43,7 +43,7 @@ Content-Type: application/json
 
 ###
 
-@customer_id = {{ createCustomer.response.body.id }}
+@customer_id = {{ createCustomer.response.body.data.id }}
 
 ### Get a customer by ID
 GET http://localhost:3000/admin/customers/{{ customer_id }}
@@ -187,7 +187,7 @@ Authorization: Bearer {{ token }}
 POST http://localhost:3000/carts
 
 ###
-@cart_uuid = {{ createCart.response.body.uuid }}
+@cart_uuid = {{ createCart.response.body.data.uuid }}
 
 
 ### Add an item to the cart "customerId": "{{ customer_id }}",

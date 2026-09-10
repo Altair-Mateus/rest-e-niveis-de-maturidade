@@ -2,10 +2,11 @@ import { Router } from "express";
 import { createCustomerService } from "../services/customer.service";
 import { CreateCustomerDto } from "../validations/customer.validations";
 import { validateSync } from "class-validator";
+import { Resource } from "../http/resource";
 
 const router = Router();
 
-router.post("/", async (req, res) => {
+router.post("/", async (req, res, next) => {
   const customerService = await createCustomerService();
   const validator = new CreateCustomerDto(req.body);
   const errors = validateSync(validator);
@@ -23,7 +24,10 @@ router.post("/", async (req, res) => {
       phone,
       address,
     });
-    res.json(customer);
+
+    const resource = new Resource(customer)
+    next(resource);
+
   } catch (e) {
     return res.send((e as any).message);
   }
