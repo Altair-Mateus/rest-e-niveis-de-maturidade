@@ -1,4 +1,3 @@
-import express from "express";
 import { createDatabaseConnection } from "./database";
 import customerRoutes from "./routes/customer.routes";
 import categoryRoutes from "./routes/category.routes";
@@ -11,27 +10,24 @@ import adminCategoryRoutes from "./routes/admin/admin-category.routes";
 import loginRoutes from "./routes/session-auth.routes";
 import jwtAuthRoutes from "./routes/jwt-auth.routes";
 import { createCustomerService } from "./services/customer.service";
-import session from "express-session";
-import jwt from "jsonwebtoken";
+// import session from "express-session";
+import express, { NextFunction, Request, Response } from "express";
+import { Resource } from "./http/resource";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(
-  session({
-    secret: "123",
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false },
-  })
-);
+// app.use(
+//   session({
+//     secret: "123",
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: { secure: false },
+//   })
+// );
 
 // app.use(async (req, res, next) => {
-//   const protectedRoutes = ["/admin", "/orders"];
-//   const isProtectedRoute = protectedRoutes.some((route) =>
-//     req.url.startsWith(route)
-//   );
 
 //   //@ts-expect-error
 //   if (isProtectedRoute && !req.session.userId) {
@@ -41,32 +37,43 @@ app.use(
 //   next();
 // });
 
-app.use(async (req, res, next) => {
-  const protectedRoutes = ["/admin", "/orders"];
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    req.url.startsWith(route)
-  );
+// app.use(async (req, resizeTo, next) => {
+//   const protectedRoutes = ["/admin", "/orders"];
+//   const isProtectedRoute = protectedRoutes.some((route) =>
+//     req.url.startsWith(route)
+//   );
 
-  if (isProtectedRoute) {
-    const authHeader = req.headers.authorization;
+//   if (isProtectedRoute && !req.userId) {
+//     return res.status(200).send({ message: "Unauthorized!" });
+//   }
+// })
 
-    if (!authHeader) {
-      return res.status(200).send({ message: "Unauthorized" });
-    }
+// app.use(async (req, res, next) => {
+//   const protectedRoutes = ["/admin", "/orders"];
+//   const isProtectedRoute = protectedRoutes.some((route) =>
+//     req.url.startsWith(route)
+//   );
 
-    const token = authHeader.split(" ")[1];
+//   if (isProtectedRoute) {
+//     const authHeader = req.headers.authorization;
 
-    try {
-      const decoded = jwt.verify(token, "123");
-      //@ts-expect-error
-      req.userId = decoded.sub;
-    } catch (e) {
-      return res.status(200).send({ message: "Unauthorized" });
-    }
-  }
+//     if (!authHeader) {
+//       return res.status(200).send({ message: "Unauthorized" });
+//     }
 
-  next();
-});
+//     const token = authHeader.split(" ")[1];
+
+//     try {
+//       const decoded = jwt.verify(token, "123");
+//       //@ts-expect-error
+//       req.userId = decoded.sub;
+//     } catch (e) {
+//       return res.status(200).send({ message: "Unauthorized" });
+//     }
+//   }
+
+//   next();
+// });
 
 app.use("/jwt", jwtAuthRoutes);
 app.use("/session", loginRoutes);
@@ -83,6 +90,13 @@ app.get("/", async (req, res) => {
   await createDatabaseConnection();
   res.send("Hello World!");
 });
+
+app.use((result: Resource, req: Request, res: Response, next: NextFunction) => {
+  if (result instanceof Resource) {
+    return res.json(result.toJson());
+  }
+  next(result);
+})
 
 app.listen(PORT, async () => {
   const customerService = await createCustomerService();

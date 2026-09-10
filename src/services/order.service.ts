@@ -13,17 +13,17 @@ export class OrderService {
     private orderRepository: Repository<Order>,
     private orderItemRepository: Repository<OrderItem>,
     private paymentRepository: Repository<Payment>
-  ) {}
+  ) { }
 
   async createOrder(data: {
     customerId: number;
     payment_method: PaymentMethod;
-    cart_id: number;
+    cart_uuid: string;
     card_token?: string
   }): Promise<{ order: Order; payment: Payment }> {
-    const { customerId, payment_method, card_token } = data;
+    const { customerId, payment_method, card_token, cart_uuid } = data;
     const cart = await this.cartRepository.findOne({
-      where: {id: data.cart_id },
+      where: { uuid: data.cart_uuid },
       relations: ["items", "items.product", "customer"],
     });
 
@@ -39,7 +39,7 @@ export class OrderService {
       throw new Error("Customer not found");
     }
 
-    if(!cart.customer){
+    if (!cart.customer) {
       cart.customer = customer;
       await this.cartRepository.save(cart);
     }
