@@ -65,7 +65,7 @@ Authorization: Bearer {{ token }}
 }
 
 ### Delete a customer
-POST http://localhost:3000/admin/customers/{{ customer_id }}/delete
+DELETE http://localhost:3000/admin/customers/{{ customer_id }}
 Content-Type: application/json
 Authorization: Bearer {{ token }}
 
@@ -110,7 +110,7 @@ Authorization: Bearer {{ token }}
 }
 
 ### Delete a category
-POST http://localhost:3000/admin/categories/{{ category_id }}/delete
+DELETE http://localhost:3000/admin/categories/{{ category_id }}
 Content-Type: application/json
 Authorization: Bearer {{ token }}
 
@@ -160,7 +160,7 @@ Authorization: Bearer {{ token }}
 }
 
 ### Delete a product
-POST http://localhost:3000/admin/products/{{ product_id }}/delete
+DELETE http://localhost:3000/admin/products/{{ product_id }}
 Content-Type: application/json
 Authorization: Bearer {{ token }}
 
@@ -181,9 +181,18 @@ Authorization: Bearer {{ token }}
 
 ### 👉👉👉 Cart Endpoints 👈👈👈
 
+### Create a cart
+
+# @name createCart
+POST http://localhost:3000/carts
+
+###
+@cart_uuid = {{ createCart.response.body.uuid }}
+
+
 ### Add an item to the cart "customerId": "{{ customer_id }}",
 # @name addItemToCart
-POST http://localhost:3000/cart/items
+POST http://localhost:3000/carts/{{cart_uuid}}/items
 Content-Type: application/json
 
 {
@@ -196,21 +205,18 @@ Content-Type: application/json
 @cart_id = {{ addItemToCart.response.body.id }}
 
 ### Get a cart by ID
-GET http://localhost:3000/cart
-Cookie: connect.sid=s%3AHoa-z1TZbcR_umqNaJw_sKRzAQdwFhCg.w0cvU3eetkMYrIDK1hweonbTvjBWXnq0oh2QIDVoktY; Path=/; HttpOnly
+GET http://localhost:3000/carts/{{cart_uuid}}
 
 ### Remove an item from the cart
-POST http://localhost:3000/cart/items/1/remove
+DELETE  http://localhost:3000/carts/{{cart_uuid}}/items/1
 Content-Type: application/json
-Cookie: connect.sid=s%3AHoa-z1TZbcR_umqNaJw_sKRzAQdwFhCg.w0cvU3eetkMYrIDK1hweonbTvjBWXnq0oh2QIDVoktY; Path=/; HttpOnly
 
 {
   "cartItemId": 1
 }
 
 ### Clear the cart
-POST http://localhost:3000/cart/clear
-Cookie: connect.sid=s%3AHoa-z1TZbcR_umqNaJw_sKRzAQdwFhCg.w0cvU3eetkMYrIDK1hweonbTvjBWXnq0oh2QIDVoktY; Path=/; HttpOnly
+POST http://localhost:3000/carts/{{cart_uuid}}/clear
 
 ### 👉👉👉 Order Endpoints 👈👈👈
 

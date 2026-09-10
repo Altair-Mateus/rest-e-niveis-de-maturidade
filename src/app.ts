@@ -51,7 +51,7 @@ app.use(async (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-      return res.status(200).send({message: "Unauthorized"});
+      return res.status(200).send({ message: "Unauthorized" });
     }
 
     const token = authHeader.split(" ")[1];
@@ -61,7 +61,7 @@ app.use(async (req, res, next) => {
       //@ts-expect-error
       req.userId = decoded.sub;
     } catch (e) {
-      return res.status(200).send({message: "Unauthorized"});
+      return res.status(200).send({ message: "Unauthorized" });
     }
   }
 
@@ -73,7 +73,7 @@ app.use("/session", loginRoutes);
 app.use("/customers", customerRoutes);
 app.use("/categories", categoryRoutes);
 app.use("/products", productRoutes);
-app.use("/cart", cartRoutes);
+app.use("/carts", cartRoutes);
 app.use("/orders", orderRoutes);
 app.use("/admin/products", adminProductRoutes);
 app.use("/admin/customers", adminCustomerRoutes);
