@@ -9,8 +9,12 @@ router.post('/', async (req, res, next) => {
     const { payment_method, card_token, cart_uuid } = req.body;
     // @ts-expect-error
     const customerId = req.userId;
-    const { order, payment } = await orderService.createOrder({ customerId, payment_method, card_token, cart_uuid });
+    const { order, payment } = await orderService.createOrder(
+        {
+            customerId, payment_method, card_token, cart_uuid
+        });
 
+    res.set('Location', `/orders/${order.id}`).status(201);
     const resource = new Resource({ order, payment });
     next(resource);
 });

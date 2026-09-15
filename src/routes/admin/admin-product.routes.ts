@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { createProductService } from "../../services/product.service";
 import { Resource, ResourceCollection } from "../../http/resource";
-import { SrvRecord } from "dns";
 
 const router = Router();
 
@@ -16,6 +15,7 @@ router.post("/", async (req, res, next) => {
     categoryIds
   );
 
+  res.set('Location', `/admin/products/${product.id}`).status(201);
   const resource = new Resource(product);
   next(resource);
 });
@@ -24,6 +24,14 @@ router.get("/:productId", async (req, res) => {
   const productService = await createProductService();
   const product = await productService.getProductById(+req.params.productId);
   const resource = new Resource(product);
+
+  if (!product) {
+    return res.status(404).json({
+      title: 'Not Found',
+      status: 404,
+      detail: `Product with id ${req.params.productId} not found`
+    })
+  }
   res.json(resource);
 });
 
@@ -45,7 +53,7 @@ router.patch("/:productId", async (req, res) => {
 router.delete("/:productId", async (req, res) => {
   const productService = await createProductService();
   await productService.deleteProduct(+req.params.productId);
-  res.send({ message: "Product deleted successfully" });
+  res.status(204).send();
 });
 
 router.get("/", async (req, res, next) => {

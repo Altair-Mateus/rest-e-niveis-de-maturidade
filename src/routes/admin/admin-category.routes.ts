@@ -10,6 +10,7 @@ router.post('/', async (req, res, next) => {
     const { name, slug } = req.body;
     const category = await categoryService.createCategory({ name, slug });
 
+    res.set('Location', `/admin/categories/${category.id}`).status(201);
     const resource = new Resource(category);
     next(resource);
 });
@@ -35,7 +36,7 @@ router.delete('/:categoryId', async (req, res) => {
     const categoryService = await createCategoryService();
     const { categoryId } = req.params;
     await categoryService.deleteCategory(+categoryId);
-    res.json({ message: 'Category deleted' });
+    res.status(204).send();
 });
 
 router.get('/', async (req, res, next) => {

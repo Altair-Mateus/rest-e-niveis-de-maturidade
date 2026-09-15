@@ -40,6 +40,8 @@ router.post("/:cartUuid/items", async (req, res, next) => {
     createdAt: cart.createdAt,
     customer: cart.customer
   });
+
+  res.set('Location', `/admin/cart/${productId}`).status(201);
   next(resource);
 });
 
@@ -58,13 +60,14 @@ router.delete("/:cartUuid/items/:cartItemId", async (req, res) => {
     cartUuid: req.params.cartUuid,
     cartItemId: parseInt(cartItemId),
   });
-  res.send({ message: "Item removed from cart" });
+  res.status(204).send();
 });
 
 router.post("/:cartUuid/clear", async (req, res) => {
   const cartService = await createCartService();
   const cart = await cartService.clearCart(req.params.cartUuid);
 
+  res.set('Location', `/admin/cart/${req.params.cartUuid}`).status(201);
   const resource = new Resource(cart);
   res.json(resource);
 });

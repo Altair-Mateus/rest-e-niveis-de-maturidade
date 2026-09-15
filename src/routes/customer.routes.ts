@@ -1,8 +1,9 @@
 import { Router } from "express";
 import { createCustomerService } from "../services/customer.service";
 import { CreateCustomerDto } from "../validations/customer.validations";
-import { validateSync } from "class-validator";
+import { validateSync, ValidationError as ClassValidationError } from "class-validator";
 import { Resource } from "../http/resource";
+import { ValidationError } from "../errors";
 
 const router = Router();
 
@@ -12,10 +13,11 @@ router.post("/", async (req, res, next) => {
   const errors = validateSync(validator);
 
   if (errors.length > 0) {
-    return res.send(errors);
+    return next(new ValidationError(errors));
   }
 
   const { name, email, password, phone, address } = req.body;
+
   try {
     const customer = await customerService.registerCustomer({
       name,
@@ -25,11 +27,12 @@ router.post("/", async (req, res, next) => {
       address,
     });
 
+    res.set('Location', `/customers/${customer.id}`).status(201);
     const resource = new Resource(customer)
     next(resource);
 
   } catch (e) {
-    return res.send((e as any).message);
+    next(e)
   }
 });
 

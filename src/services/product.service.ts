@@ -5,7 +5,7 @@ import { In } from 'typeorm';
 import { createDatabaseConnection } from "../database";
 
 export class ProductService {
-  constructor(private productRepository: Repository<Product>, private categoryRepository: Repository<Category>) {}
+  constructor(private productRepository: Repository<Product>, private categoryRepository: Repository<Category>) { }
 
   async createProduct(
     name: string,
@@ -14,9 +14,12 @@ export class ProductService {
     price: number,
     categoryIds: number[]
   ): Promise<Product> {
-    const categories = await this.categoryRepository.find({ where: {
+
+    const categories = await this.categoryRepository.find({
+      where: {
         id: In(categoryIds)
-    } });
+      }
+    });
 
     const product = new Product();
     product.name = name;
