@@ -10,6 +10,8 @@ Content-Type: application/json
 }
 
 ###
+OPTIONS http://localhost:3000/products
+###
 
 @token = {{ jwt_login.response.body.token }}
 
@@ -29,6 +31,13 @@ POST http://localhost:3000/session/logout
 
 ### 👉👉👉 Customer Endpoints 👈👈👈
 
+### With form-urlencoded
+POST http://localhost:3000/customers
+Content-Type: application/x-www-form-urlencoded
+
+name=john_doe&email=john@example.com&password=securepassword&phone=1234567890&address=123 Main St
+
+###
 # @name createCustomer
 POST http://localhost:3000/customers
 Content-Type: application/json
@@ -40,6 +49,8 @@ Content-Type: application/json
   "phone": "1234567890",
   "address": "123 Main St"
 }
+
+
 
 ###
 
@@ -65,6 +76,7 @@ Authorization: Bearer {{ token }}
 }
 
 ### Delete a customer
+
 DELETE http://localhost:3000/admin/customers/{{ customer_id }}
 Content-Type: application/json
 Authorization: Bearer {{ token }}
@@ -174,6 +186,7 @@ GET http://localhost:3000/products?page=1&limit=10
 ### List products in admin with pagination and optional filtering &name=Product&categories_slug=category-slug&user_id=1
 GET http://localhost:3000/admin/products?page=1&limit=10
 Authorization: Bearer {{ token }}
+Accept: text/csv
 
 ### Get csv of products
 GET http://localhost:3000/admin/products.csv

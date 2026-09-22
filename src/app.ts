@@ -13,14 +13,71 @@ import { createCustomerService, UserAlresyExistsError } from "./services/custome
 // import session from "express-session";
 import express, { NextFunction, Request, Response } from "express";
 import { Resource } from "./http/resource";
-import { NestedSetMultipleRootError } from "typeorm/error/NestedSetMultipleRootError.js";
 import { ValidationError } from "./errors";
-import { title } from "process";
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(async (req, resizeBy, next) => {
+  if (!req.headers["content-type"]) {
+    return next();
+  }
+
+  const allowedContentTypes = [
+    "application/json",
+    "application/x-www-form-urlencoded",
+  ];
+
+  if (!allowedContentTypes.includes(req.headers["content-type"])) {
+    return resizeBy.status(415).json({
+      title: "Unsupported Media Type",
+      status: 415,
+      detail: "Unsupported Media Type. Please use application/json or application/x-www-form-urlencoded"
+    });
+  }
+
+  next();
+})
+
+app.use(async (req, res, next) => {
+  const routesAllowingAlternateAccept = [
+    {
+      url: "/admin/products",
+      method: "GET",
+      accept: "text/csv",
+    }
+  ];
+
+  const acceptHeader = req.headers["accept"];
+  if (!acceptHeader) {
+    return next();
+  }
+
+
+  if (acceptHeader === "application/json" || acceptHeader === "*/*") {
+    return next();
+  }
+
+  const route = routesAllowingAlternateAccept.find((route) => {
+    return req.url.startsWith(route.url) && req.method === route.method;
+  });
+
+  if (route && acceptHeader === route.accept) {
+    return next();
+  }
+
+  return res.status(406).send({
+    title: "Not Acceptable",
+    status: 406,
+    detail: `Not acceptable format requested: ${req.headers["accept"]}, only application/json and text/csv are supported`
+  })
+})
+
+
 // app.use(
 //   session({
 //     secret: "123",
