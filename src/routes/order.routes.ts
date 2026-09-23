@@ -15,7 +15,24 @@ router.post('/', async (req, res, next) => {
         });
 
     res.set('Location', `/orders/${order.id}`).status(201);
-    const resource = new Resource({ order, payment });
+    const resource = new Resource({ order, payment },
+        {
+            _links: {
+                self: {
+                    href: `/orders/${order.id}`,
+                    method: "GET",
+                },
+                cancel: {
+                    href: `/orders/${order.id}`,
+                    method: "DELETE",
+                },
+                payment: {
+                    href: `/orders/${order.id}/payments`,
+                    method: "POST",
+                },
+            },
+        }
+    );
     next(resource);
 });
 

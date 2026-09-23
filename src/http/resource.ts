@@ -1,41 +1,63 @@
-export class Resource<T = Object> {
-
-    constructor(protected data: T, protected meta?: any) { }
-
-    toJson() {
-        return {
-            data: this.data,
-            ...(this.meta ? { meta: this.meta } : {}),
-        }
-    }
-
+export interface IResource {
+    toJson(): any;
 }
 
-export class ResourceCollection<T> extends Resource<T[]> {
+export type Link = {
+    href: string;
+    method: string;
+    type?: string;
+}
 
-    constructor(data: T[], meta?: {
-        paginationData?: { total: number, page: number, limit: number };
-        [key: string]: any;
-    }) {
-        super(data, meta);
+export class Resource implements IResource {
+    constructor(
+        protected data: any,
+        protected meta?: { links?: { [key: string]: Link };[key: string]: any; }
+    ) { }
+
+    toJson() {
+        const { links, ...otherMeta } = this.meta || {};
+
+        return {
+            data: this.data,
+            _meta: {
+                ...otherMeta,
+                ...(links && { _links: links }),
+            },
+        };
     }
+}
+
+export class ResourceCollection implements IResource {
+    constructor(
+        protected data: any[],
+        protected meta?: {
+            paginationData?: { total: number; page: number; limit: number };
+            links?: { [key: string]: Link };
+            [key: string]: any;
+        }
+    ) { }
 
     toJson() {
 
-        const { paginationData, otherData } = this.meta || {};
+        const { paginationData, links, ...otherData } = this.meta || {};
 
         const meta = {
             ...otherData,
+            //@ts-expect-error
             current_page: paginationData.page,
+            //@ts-expect-error
             total: paginationData.total,
-            per_page: paginationData.limit,
-        }
+            //@ts-expect-error
+            per_page: paginationData.limit
+        };
 
         return {
             data: this.data,
-            meta,
-        }
+            _meta: {
+                ...meta,
+                ...(links && { _links: links }),
+            },
+        };
+
     }
-
-
 }

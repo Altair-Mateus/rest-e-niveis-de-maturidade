@@ -3,6 +3,7 @@ import { createProductService } from "../../services/product.service";
 import { Resource, ResourceCollection } from "../../http/resource";
 import cors from "cors";
 import { defaultCorsOptions } from "../../http/cors";
+import { ProductResource } from "../../http/product-resource";
 
 const router = Router();
 
@@ -19,17 +20,24 @@ const corsItem = cors({
 router.post("/", corsCollection, async (req, res, next) => {
   const productService = await createProductService();
   const { name, slug, description, price, categoryIds } = req.body;
-  const product = await productService.createProduct(
-    name,
-    slug,
-    description,
-    price,
-    categoryIds
-  );
 
-  res.set('Location', `/admin/products/${product.id}`).status(201);
-  const resource = new Resource(product);
-  next(resource);
+  try {
+    const product = await productService.createProduct(
+      name,
+      slug,
+      description,
+      price,
+      categoryIds
+    );
+
+    res.set('Location', `/admin/products/${product.id}`).status(201);
+    const resource = new ProductResource(product, req);
+    next(resource);
+  } catch (e) {
+    next(e);
+  }
+
+
 });
 
 router.get("/:productId", corsItem, async (req, res) => {
